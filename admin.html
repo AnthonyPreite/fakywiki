@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./src/style.css">
+  <title>Admin - Astorie</title>
+  <style>
+    .adm {
+      max-width: 1890px;
+      margin: 20px auto;
+      padding: 0 20px;
+      font-size: 14px
+    }
+
+    .adm h1 {
+      margin-bottom: 15px
+    }
+
+    .adm label {
+      display: block;
+      margin: 10px 0 3px;
+      font-weight: bold
+    }
+
+    .adm input[type=text],
+    .adm input[type=password],
+    .adm select,
+    .adm textarea {
+      width: 100%;
+      padding: 6px;
+      border: 1px solid #a2a9b1;
+      font-family: monospace
+    }
+
+    .adm textarea {
+      min-height: 140px
+    }
+
+    .adm button {
+      padding: 6px 12px;
+      margin: 4px 4px 0 0;
+      border: 1px solid #a2a9b1;
+      background: #f8f9fa;
+      cursor: pointer
+    }
+
+    .adm table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0
+    }
+
+    .adm td,
+    .adm th {
+      border: 1px solid #a2a9b1;
+      padding: 6px;
+      text-align: left
+    }
+
+    .cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #555;
+      font-weight: normal
+    }
+
+    #preview {
+      background: #fff;
+      border: 1px solid #a7d7f9;
+      padding: 15px;
+      overflow: auto;
+      max-height: 90vh
+    }
+
+    .hide {
+      display: none
+    }
+  </style>
+</head>
+
+<body>
+  <script src="./src/wiki.js"></script>
+  <div class="adm">
+    <div id="login">
+      <h1>Admin</h1><input type="password" id="tok" placeholder="Mot de passe"><button
+        onclick="login()">Connexion</button> <span id="err"></span>
+    </div>
+    <div id="list" class="hide">
+      <h1>Pages <a href="index.html" style="font-size:14px">← voir le wiki</a></h1>
+      <button onclick="edit(null,'country')">+ Nouveau pays</button><button onclick="edit(null,'person')">+ Nouvelle
+        personnalité</button>
+      <table id="tbl"></table>
+    </div>
+    <div id="editor" class="hide">
+      <h1 id="etitle"></h1>
+      <div class="cols">
+        <div>
+          <label>Type</label><select id="type">
+            <option value="country">Pays</option>
+            <option value="person">Personnalité</option>
+          </select>
+          <label>Titre</label><input type="text" id="title">
+          <label>Slug (URL) <span class="hint">lettres minuscules, chiffres et tirets — non modifiable après
+              création</span></label><input type="text" id="slug">
+          <label><input type="checkbox" id="published"> Visible publiquement</label>
+          <label>Introduction <span class="hint">markdown</span></label><textarea id="intro"></textarea>
+          <label>Contenu <span class="hint">markdown : ## Titre, ### Sous-titre, - liste, **gras**, *italique*,
+              [texte](slug-d-une-page) ou [texte](https://…)</span></label><textarea id="body"
+            style="min-height:300px"></textarea>
+          <label>Infobox <span class="hint">@image url | légende — ## Section — Label | Valeur (le markdown des liens
+              marche aussi)</span></label><textarea id="infobox" style="min-height:260px"></textarea>
+          <button onclick="save()"><b>Enregistrer</b></button><button onclick="preview()">Prévisualiser</button><button
+            onclick="back()">Retour</button> <span id="msg"></span>
+        </div>
+        <div id="preview"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const $ = id => document.getElementById(id); let tok = sessionStorage.token || '', editing = null, pages = [];
+    const api = (u, o = {}) => fetch(u, { ...o, headers: { 'x-admin-token': tok, ...(o.headers || {}) } });
+    const TPL = {
+      country: '@image ./public/img/drapeau.png | Drapeau\n@image ./public/img/blason.png | Armoiries\nDevise | \nFête nationale | \n@map ./public/img/Astorie_location_3.svg | Localisation\n## Administration\nForme de l\'état | \nPrésident | \nCapitale | \n## Géographie\nSuperficie totale | \n## Démographie\nGentilé | \nPopulation totale | \n## Économie\nMonnaie | \n## Divers\nCode ISO 3166-1 | ',
+      person: '@image ./public/img/portrait.png | Portrait\n## Fonction\nPoste | \nDepuis | \n## Biographie\nNaissance | \nNationalité | \nParti politique | '
+    };
+    async function login() { tok = $('tok').value; const r = await api('/api/login'); if (r.ok) { sessionStorage.token = tok; show('list'); load(); } else $('err').textContent = 'Mot de passe incorrect'; }
+    function show(id) { for (const x of ['login', 'list', 'editor']) $(x).classList.toggle('hide', x !== id); }
+    async function load() {
+      pages = await (await api('/api/pages')).json();
+      $('tbl').innerHTML = '<tr><th>Titre</th><th>Type</th><th>Statut</th><th>Actions</th></tr>' + pages.map(p => `<tr><td><a href="page.html?slug=${p.slug}">${esc(p.title)}</a></td><td>${p.type === 'country' ? 'Pays' : 'Personnalité'}</td><td>${p.published ? '✅ Visible' : '🔒 Brouillon'}</td>
+    <td><button onclick="edit('${p.slug}')">Modifier</button><button onclick="toggle('${p.slug}')">${p.published ? 'Masquer' : 'Publier'}</button><button onclick="del('${p.slug}')">Supprimer</button></td></tr>`).join('');
+    }
+    const put = p => api('/api/pages/' + p.slug, { method: 'PUT', body: JSON.stringify(p) });
+    async function toggle(s) { const p = pages.find(x => x.slug === s); p.published = !p.published; await put(p); load(); }
+    async function del(s) { if (confirm('Supprimer définitivement "' + s + '" ?')) { await api('/api/pages/' + s, { method: 'DELETE' }); load(); } }
+    function edit(s, type) {
+      editing = s; const p = s ? pages.find(x => x.slug === s) : { type, title: '', slug: '', published: false, intro: '', body: '## Section\n', infobox: TPL[type] };
+      $('etitle').textContent = s ? 'Modifier : ' + p.title : 'Nouvelle page'; $('slug').disabled = !!s;
+      for (const k of ['type', 'title', 'slug', 'intro', 'body', 'infobox']) $(k).value = p[k] || ''; $('published').checked = !!p.published;
+      $('type').onchange = () => { if (!s && confirm('Remplacer l\'infobox par le modèle de ce type ?')) $('infobox').value = TPL[$('type').value]; };
+      $('title').oninput = () => { if (!s) $('slug').value = slugify($('title').value); }; $('preview').innerHTML = ''; $('msg').textContent = ''; show('editor');
+    }
+    const cur = () => ({ type: $('type').value, title: $('title').value, slug: $('slug').value, published: $('published').checked, intro: $('intro').value, body: $('body').value, infobox: $('infobox').value });
+    const preview = () => $('preview').innerHTML = renderPage(cur());
+    async function save() {
+      const p = cur(); if (!p.title || !/^[a-z0-9-]+$/.test(p.slug)) return $('msg').textContent = 'Titre et slug valide requis';
+      if (!editing && pages.some(x => x.slug === p.slug)) return $('msg').textContent = 'Ce slug existe déjà';
+      const r = await put(p); $('msg').textContent = r.ok ? '✅ Enregistré' : '❌ Erreur'; if (r.ok) { editing = p.slug; $('slug').disabled = true; }
+    }
+    const back = () => { show('list'); load(); };
+    if (tok) api('/api/login').then(r => r.ok ? (show('list'), load()) : 0);
+  </script>
+</body>
+
+</html>

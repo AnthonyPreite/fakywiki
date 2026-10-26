@@ -1,0 +1,11 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="./src/style.css"><title>Wikipédia</title></head><body>
+<script src="./src/wiki.js"></script>
+<script>
+const slug = new URLSearchParams(location.search).get('slug');
+// si l'admin est connecté, il peut prévisualiser les brouillons
+fetch('/api/pages/' + slug, { headers: { 'x-admin-token': sessionStorage.token || '' } })
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(p => { document.title = p.title + ' - Wikipédia'; document.body.innerHTML = shell(renderPage(p)); })
+  .catch(() => document.body.innerHTML = shell('<h1 class="article-title">Page introuvable</h1><p>Cette page n\'existe pas ou n\'est pas publiée.</p>'));
+</script></body></html>

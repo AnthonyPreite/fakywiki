@@ -1,0 +1,12 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="./src/style.css"><title>Accueil - Wikipédia</title></head><body>
+<script src="./src/wiki.js"></script>
+<script>
+fetch('/api/pages').then(r => r.json()).then(pages => {
+  const list = t => pages.filter(p => p.type === t).sort((a, b) => a.title.localeCompare(b.title))
+    .map(p => `<li><a href="page.html?slug=${p.slug}">${esc(p.title)}</a></li>`).join('') || '<li><em>Aucune page pour l\'instant</em></li>';
+  document.body.innerHTML = shell(`<h1 class="article-title">Wikipédia, l'encyclopédie libre</h1>
+    <h2 class="linux-font" id="pays">Pays</h2><ul>${list('country')}</ul>
+    <h2 class="linux-font" id="personnalites">Personnalités</h2><ul>${list('person')}</ul>`);
+});
+</script></body></html>
