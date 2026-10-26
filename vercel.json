@@ -1,7 +1,1 @@
-{
-  "rewrites": [
-    { "source": "/api/login", "destination": "/api/login" },
-    { "source": "/api/pages", "destination": "/api/pages/index" },
-    { "source": "/api/pages/:slug", "destination": "/api/pages/:slug" }
-  ]
-}
+{}
