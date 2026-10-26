@@ -1,0 +1,12 @@
+{
+  "name": "astorie-wiki",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "import-data": "node scripts/import-to-firestore.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}

@@ -1,0 +1,5 @@
+node_modules/
+.vercel/
+service-account.json
+.DS_Store
+data/pages.json.tmp
