@@ -3,6 +3,7 @@
   functions = "netlify/functions"
 
 [functions]
+  external_node_modules = ["firebase-admin"]
   included_files = ["data/pages.json"]
 
 [dev]
