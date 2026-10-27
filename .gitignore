@@ -3,3 +3,6 @@ node_modules/
 service-account.json
 .DS_Store
 data/pages.json.tmp
+
+# Local Netlify folder
+.netlify

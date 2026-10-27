@@ -152,7 +152,7 @@
     async function save() {
       const p = cur(); if (!p.title || !/^[a-z0-9-]+$/.test(p.slug)) return $('msg').textContent = 'Titre et slug valide requis';
       if (!editing && pages.some(x => x.slug === p.slug)) return $('msg').textContent = 'Ce slug existe déjà';
-      const r = await put(p); $('msg').textContent = r.ok ? '✅ Enregistré' : '❌ Erreur'; if (r.ok) { editing = p.slug; $('slug').disabled = true; }
+      const r = await put(p); $('msg').textContent = r.ok ? '✅ Enregistré' : '❌ ' + ((await r.json().catch(() => ({}))).error || 'Erreur'); if (r.ok) { editing = p.slug; $('slug').disabled = true; }
     }
     const back = () => { show('list'); load(); };
     if (tok) api('/api/login').then(r => r.ok ? (show('list'), load()) : 0);
