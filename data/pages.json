@@ -13,10 +13,10 @@
     "type": "person",
     "title": "Anton Preisan",
     "slug": "anton-preisan",
-    "published": false,
+    "published": true,
     "intro": "",
     "body": "## Section\n",
-    "infobox": "@image ./public/img/portrait.png | Portrait\n## Fonction\nPoste | \nDepuis | \n## Biographie\nNaissance | \nNationalité | \nParti politique | ",
-    "updated": "2026-10-23T20:17:39.807Z"
+    "infobox": "@image ./public/img/preisan.jpg\n | Portrait\n## Fonction\n### Président de la République d'Astorie\n#### En fonction depuis le 1 mars 2022\n\nElection | 22 décembre 2021\n## Biographie\nNaissance | \nNationalité | \nParti politique | ",
+    "updated": "2026-10-29T22:10:42.222Z"
   }
 ]

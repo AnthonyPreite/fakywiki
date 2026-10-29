@@ -23,23 +23,23 @@ function md(src) {
   for (let i = 0; i < L.length; i++) {
     const l = L[i]; let m;
     if (/^\s*\|/.test(l)) { flush(); endList(); const rows = []; while (i < L.length && /^\s*\|/.test(L[i])) rows.push(L[i++]); i--; h += table(rows); }
-    else if (m = l.match(/^(#{2,3}) (.+)/)) {
+    else if (m = l.match(/^(#{2,4}) (.+)/)) {
       flush(); endList(); const id = slugify(m[2]); toc.push({ lvl: m[1].length, id, t: m[2] });
-      h += m[1] === '##' ? `<h2 class="linux-font" id="${id}">${inline(m[2])}</h2>` : `<h3 class="font" id="${id}">${inline(m[2])}</h3>`;
+      h += m[1] === '##' ? `<h2 class="linux-font" id="${id}">${inline(m[2])}</h2>` : (m[1] === '###' ? `<h3 class="font" id="${id}">${inline(m[2])}</h3>` : `<h4 class="font" id="${id}">${inline(m[2])}</h4>`);
     } else if (m = l.match(/^[-*] (.+)/)) { flush(); if (!list) h += '<ul>'; list = true; h += `<li>${inline(m[1])}</li>`; }
     else if (!l.trim()) { flush(); endList(); } else { endList(); p.push(l.trim()); }
   }
   flush(); endList(); return { html: h, toc };
 }
 
-// Infobox : "@image url | légende" / "## Section" / "Label | Valeur"
+// Infobox : "@image url | légende" / "## Section" / "### Fonction" / "#### Statut/Durée" / "Label | Valeur"
 function parseBox(t) {
   const o = { images: [], sections: [{ rows: [] }] };
   for (const l of (t || '').split('\n')) {
     if (!l.trim()) continue; let m;
     if (m = l.match(/^@image (.+?)(?:\s*\|\s*(.*))?$/)) o.images.push({ src: m[1], cap: m[2] || '' });
     else if (m = l.match(/^@map (.+?)(?:\s*\|\s*(.*))?$/)) o.sections.at(-1).rows.push({ map: { src: m[1], cap: m[2] || '' } });
-    else if (m = l.match(/^## (.+)/)) o.sections.push({ title: m[1], rows: [] });
+    else if (m = l.match(/^(#{2,4})\s*(.+)/)) o.sections.push({ title: m[2], level: m[1].length, rows: [] });
     else { const [a, ...b] = l.split('|'); o.sections.at(-1).rows.push([a.trim(), b.join('|').trim()]); }
   }
   return o;
@@ -47,7 +47,13 @@ function parseBox(t) {
 function infobox(type, title, text) {
   const b = parseBox(text), p = type === 'person';
   const imgs = b.images.map(i => `<div class="${p ? 'infobox-image-people' : 'infobox-image'}">${p ? `<img src="${esc(i.src)}">` : `<div class="flag"><img src="${esc(i.src)}"></div>`}<div class="infobox-legend">${esc(i.cap)}</div></div>`).join('');
-  const rows = b.sections.map(s => (s.title ? `<div class="${p ? 'section_box-people' : 'section_box'}"><p>${esc(s.title)}</p></div>` : '') +
+  const titleHtml = s => {
+    if (!s.title) return '';
+    if (s.level === 4) return `<div class="infobox-row-central"><div class="infobox-label-central-thin">${inline(s.title)}</div></div>`;
+    const cls = p ? (s.level === 3 ? 'section_box-people-fonction' : 'section_box-people') : 'section_box';
+    return `<div class="${cls}"><p>${inline(s.title)}</p></div>`;
+  };
+  const rows = b.sections.map(s => titleHtml(s) +
     s.rows.map(r => !Array.isArray(r) ? `<div class="infobox-image"><div class="map"><img src="${esc(r.map.src)}" alt=""></div><div class="infobox-legend--2">${esc(r.map.cap)}</div></div>` : (([a, v]) => `<div class="infobox-row"><div class="infobox-label">${inline(a)}</div><div class="infobox-value">${inline(v)}</div></div>`)(r)).join('')).join('');
   return `<div class="infobox"><div class="infobox-title ${p ? 'people' : 'country'}">${esc(title)}</div><div class="flex-box">${imgs}</div><div class="infobox-data">${rows}</div></div>`;
 }

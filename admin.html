@@ -114,8 +114,14 @@
           <label>Contenu <span class="hint">markdown : ## Titre, ### Sous-titre, - liste, **gras**, *italique*,
               [texte](slug-d-une-page) ou [texte](https://…)</span></label><textarea id="body"
             style="min-height:300px"></textarea>
-          <label>Infobox <span class="hint">@image url | légende — ## Section — Label | Valeur (le markdown des liens
-              marche aussi)</span></label><textarea id="infobox" style="min-height:260px"></textarea>
+          <label>Infobox <span class="hint">@image url | légende — ## Section — ### Fonction — #### Statut/Durée — Label | Valeur</span></label>
+          <div style="margin: 4px 0 6px 0;">
+            <button type="button" onclick="insertBox('## Section')">+ Section (##)</button>
+            <button type="button" onclick="insertBox('### Fonction')">+ Fonction (###)</button>
+            <button type="button" onclick="insertBox('#### En fonction depuis...')">+ Statut / Durée (####)</button>
+            <button type="button" onclick="insertBox('Label | Valeur')">+ Ligne (|)</button>
+          </div>
+          <textarea id="infobox" style="min-height:260px"></textarea>
           <button onclick="save()"><b>Enregistrer</b></button><button onclick="preview()">Prévisualiser</button><button
             onclick="back()">Retour</button> <span id="msg"></span>
         </div>
@@ -128,8 +134,16 @@
     const api = (u, o = {}) => fetch(u, { ...o, headers: { 'x-admin-token': tok, ...(o.headers || {}) } });
     const TPL = {
       country: '@image ./public/img/drapeau.png | Drapeau\n@image ./public/img/blason.png | Armoiries\nDevise | \nFête nationale | \n@map ./public/img/Astorie_location_3.svg | Localisation\n## Administration\nForme de l\'état | \nPrésident | \nCapitale | \n## Géographie\nSuperficie totale | \n## Démographie\nGentilé | \nPopulation totale | \n## Économie\nMonnaie | \n## Divers\nCode ISO 3166-1 | ',
-      person: '@image ./public/img/portrait.png | Portrait\n## Fonction\nPoste | \nDepuis | \n## Biographie\nNaissance | \nNationalité | \nParti politique | '
+      person: '@image ./public/img/portrait.png | Portrait\n## Fonctions\n### Poste actuel\n#### En fonction depuis ...\nPoste | \nDepuis | \n## Biographie\nNaissance | \nNationalité | \nParti politique | '
     };
+    function insertBox(txt) {
+      const t = $('infobox'), s = t.selectionStart, e = t.selectionEnd, v = t.value;
+      const ins = (s > 0 && v[s - 1] !== '\n' ? '\n' : '') + txt + '\n';
+      t.value = v.slice(0, s) + ins + v.slice(e);
+      t.focus();
+      t.selectionStart = t.selectionEnd = s + ins.length;
+      preview();
+    }
     async function login() { tok = $('tok').value; const r = await api('/api/login'); if (r.ok) { sessionStorage.token = tok; show('list'); load(); } else $('err').textContent = 'Mot de passe incorrect'; }
     function show(id) { for (const x of ['login', 'list', 'editor']) $(x).classList.toggle('hide', x !== id); }
     async function load() {
