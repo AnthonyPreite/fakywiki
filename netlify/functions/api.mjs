@@ -1,6 +1,7 @@
 // API du wiki : /api/login, /api/pages, /api/pages/:slug
 import fs from 'node:fs';
 import path from 'node:path';
+import 'firebase-admin'; // import statique : force l'inclusion de firebase-admin dans le bundle Netlify
 import firebase from '../../lib/firebase.js';
 
 const { db } = firebase;
