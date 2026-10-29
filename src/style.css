@@ -209,6 +209,7 @@ body {
 
 .infobox-data {
   margin-bottom: 10px;
+  width: stretch;
 }
 
 .infobox-row {
