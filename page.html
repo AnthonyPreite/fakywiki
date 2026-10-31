@@ -6,6 +6,6 @@ const slug = new URLSearchParams(location.search).get('slug');
 // si l'admin est connecté, il peut prévisualiser les brouillons
 fetch('/api/pages/' + slug, { headers: { 'x-admin-token': sessionStorage.token || '' } })
   .then(r => r.ok ? r.json() : Promise.reject())
-  .then(p => { document.title = p.title + ' - Wikipédia'; document.body.innerHTML = shell(renderPage(p)); })
+  .then(p => { document.title = p.title + ' - Wikipéria'; document.body.innerHTML = shell(renderPage(p)); })
   .catch(() => document.body.innerHTML = shell('<h1 class="article-title">Page introuvable</h1><p>Cette page n\'existe pas ou n\'est pas publiée.</p>'));
 </script></body></html>
