@@ -66,7 +66,7 @@ function renderPage(p) {
 
 function shell(inner) {
   return `<div class="header"><div class="page-tools"><a href="index.html">Accueil</a></div><div class="user-tools"><a href="admin.html">Admin</a></div></div>
-<div class="container"><div class="menu"><div class="sidebar"><div class="sidebar-logo"><a href="index.html"><img src="./public/img/Wikipedia-logo-v2.svg.png" alt=""></a></div><p class="title">Wikipedia</p><div class="tagline">L'encyclopédie libre</div></div>
+<div class="container"><div class="menu"><div class="sidebar"><div class="sidebar-logo"><a href="index.html"><img src="./public/img/Wikipedia-logo-v2.svg.png" alt=""></a></div><p class="title">Wikiperia</p><div class="tagline">L'encyclopédie libre</div></div>
 <div class="sidebar-nav"><div class="sidebar-nav-group"><h3>Navigation</h3><ul><li><a href="index.html">Accueil</a></li><li><a href="index.html#pays">Pays</a></li><li><a href="index.html#personnalites">Personnalités</a></li></ul></div></div></div>
 <div class="main-content"><div class="article-wrapper"><div class="article-tabs"><a class="active">Article</a></div><div class="article-content">${inner}</div></div></div></div>`;
 }
